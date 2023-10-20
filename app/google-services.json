@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "42099937623",
+    "project_id": "coins-da192",
+    "storage_bucket": "coins-da192.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:42099937623:android:0fc65c7fe6bc895cb6ee12",
+        "android_client_info": {
+          "package_name": "com.example.bitcointickercompose"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATkISCl9cRwxdF0rtMqP50g3wxfFZREQM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
