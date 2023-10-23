@@ -38,7 +38,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun BitcoinTickerComposeTheme(
+fun BitcoinTickerComposeTheme1(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
@@ -64,7 +64,7 @@ fun BitcoinTickerComposeTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = Typography1,
         content = content
     )
 }

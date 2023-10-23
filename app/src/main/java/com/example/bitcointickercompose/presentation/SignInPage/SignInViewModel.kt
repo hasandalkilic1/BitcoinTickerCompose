@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bitcointickercompose.domain.usecase.SignInUseCase
+import com.example.bitcointickercompose.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -17,7 +18,19 @@ class SignInViewModel @Inject constructor(private val signInUseCase: SignInUseCa
 
     fun signIn(email: String, password: String) = viewModelScope.launch {
         signInUseCase.invoke(email, password).collect {
-            _signInState.value = SignInState(authResult = it.data)
+            when (it) {
+                is Resource.Error -> {
+                    _signInState.value = SignInState(error = "SignInError")
+                }
+
+                is Resource.Loading -> {
+                    _signInState.value = SignInState(isLoading = true)
+                }
+
+                is Resource.Success -> {
+                    _signInState.value = SignInState(authResult = it.data)
+                }
+            }
         }
     }
 }
