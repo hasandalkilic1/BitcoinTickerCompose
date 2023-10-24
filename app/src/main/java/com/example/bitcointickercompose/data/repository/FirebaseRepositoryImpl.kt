@@ -27,9 +27,11 @@ class FirebaseRepositoryImpl @Inject constructor(
         password: String
     ): Flow<Resource<AuthResult>> = flow {
         emit(Resource.Loading())
-        emit(Resource.Success(firebaseAuth.signInWithEmailAndPassword(email, password).await()))
+        emit(Resource.Success(firebaseAuth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
+
+        }.await()))
     }.catch {
-        emit(Resource.Error(it.message ?: "Error!"))
+        emit(Resource.Error(it.message ?: "signInError"))
     }
 
     override fun signUpWithEmailAndPassword(
@@ -39,7 +41,7 @@ class FirebaseRepositoryImpl @Inject constructor(
         emit(Resource.Loading())
         emit(Resource.Success(firebaseAuth.createUserWithEmailAndPassword(email, password).await()))
     }.catch {
-        emit(Resource.Error(it.message ?: "Error!"))
+        emit(Resource.Error(it.message ?: "signUpError"))
     }
 
     override fun signOut() {
