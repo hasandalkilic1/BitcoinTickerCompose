@@ -18,12 +18,17 @@ import com.example.bitcointickercompose.presentation.SignInPage.SignInPage
 import com.example.bitcointickercompose.presentation.SignUpPage.SignUpPage
 import com.example.bitcointickercompose.presentation.SplashPage.SplashPage
 import com.example.bitcointickercompose.presentation.theme.BitcoinTickerComposeTheme1
+import com.example.bitcointickercompose.utils.UserManagerDataStorage
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private var backButtonPressedOnce = false
+
+    @Inject
+    lateinit var userManager: UserManagerDataStorage
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,11 +48,11 @@ class MainActivity : ComponentActivity() {
                         composable(route = Screen.SplashPage.route) {
                             SplashPage(navController = navController)
                         }
-                        composable(route = Screen.SignInPage.route){
+                        composable(route = Screen.SignInPage.route) {
                             SignInPage(navController = navController)
                         }
-                        composable(route = Screen.HomePage.route){
-                            HomePage(navController = navController)
+                        composable(route = Screen.HomePage.route) {
+                            HomePage(navController = navController, userManager = userManager)
                         }
                         composable(route = Screen.SignUpPage.route) {
                             SignUpPage(navController = navController)

@@ -11,23 +11,23 @@ import com.example.bitcointickercompose.data.model.coinmarket.CoinMarketEntity
 interface CoinsDAO {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertCoinList(items: List<CoinListEntity>)
+    suspend fun insertCoinList(items: List<CoinListEntity>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertCoinMarkets(items: List<CoinMarketEntity>)
+    suspend fun insertCoinMarkets(items: List<CoinMarketEntity>)
 
     @Query("SELECT * FROM coin_list ORDER BY id ASC")
-    fun getCoinList(): List<CoinListEntity>
+    suspend fun getCoinList(): List<CoinListEntity>
 
     @Query("SELECT * FROM coin_markets ORDER BY id ASC")
-    fun getCoinMarkets(): List<CoinMarketEntity>
+    suspend fun getCoinMarkets(): List<CoinMarketEntity>
 
     @Query("SELECT * FROM coin_list WHERE name LIKE '%' || :searchQuery || '%' ORDER BY name ASC")
-    fun searchCoin(searchQuery: String): List<CoinListEntity>
+    suspend fun searchCoin(searchQuery: String): List<CoinListEntity>
 
     @Query("DELETE FROM coin_list")
-    fun deleteCoinList()
+    suspend fun deleteCoinList()
 
     @Query("DELETE FROM coin_markets")
-    fun deleteCoinMarkets()
+    suspend fun deleteCoinMarkets()
 }
