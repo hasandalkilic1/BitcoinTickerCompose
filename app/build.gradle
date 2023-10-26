@@ -69,8 +69,6 @@ dependencies {
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
 
-    //Livedata
-
 
     // Compose dependencies
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2"
@@ -78,6 +76,7 @@ dependencies {
     implementation "com.google.accompanist:accompanist-flowlayout:0.17.0"
     implementation "androidx.lifecycle:lifecycle-runtime-compose:2.6.2"
     implementation "androidx.compose.runtime:runtime-livedata:1.5.4"
+    implementation "androidx.constraintlayout:constraintlayout-compose:1.0.1"
 
     // Lottie Animation
     implementation "com.airbnb.android:lottie:4.0.0"

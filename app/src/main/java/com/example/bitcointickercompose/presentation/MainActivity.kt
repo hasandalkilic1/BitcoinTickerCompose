@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.bitcointickercompose.presentation.DetailPage.DetailPage
 import com.example.bitcointickercompose.presentation.HomePage.HomePage
 import com.example.bitcointickercompose.presentation.SignInPage.SignInPage
 import com.example.bitcointickercompose.presentation.SignUpPage.SignUpPage
@@ -56,6 +57,9 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(route = Screen.SignUpPage.route) {
                             SignUpPage(navController = navController)
+                        }
+                        composable(route = Screen.DetailPage.route) {
+                            DetailPage(navController = navController)
                         }
                     }
                 }

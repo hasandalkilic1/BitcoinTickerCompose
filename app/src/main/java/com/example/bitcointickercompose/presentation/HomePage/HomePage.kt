@@ -4,14 +4,20 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -32,13 +38,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.rememberImagePainter
 import com.example.bitcointickercompose.R
+import com.example.bitcointickercompose.domain.model.CoinMarkets
 import com.example.bitcointickercompose.presentation.MainActivity
+import com.example.bitcointickercompose.presentation.Screen
 import com.example.bitcointickercompose.presentation.theme.beige
 import com.example.bitcointickercompose.presentation.theme.light_Green
 import com.example.bitcointickercompose.utils.Resource
@@ -70,6 +82,9 @@ fun HomePage(
         ) {
 
         }
+
+        HomePageCoinMarketsColumn(navController = navController)
+
         Scaffold(
             bottomBar = { HomePageBottomButtons() },
             modifier = Modifier
@@ -82,6 +97,114 @@ fun HomePage(
         ) {
 
         }
+    }
+}
+
+@Composable
+fun HomePageCoinMarketsColumn(
+    navController: NavController,
+    viewModel: HomePageViewModel = hiltViewModel(),
+) {
+    val coinMarketsState = viewModel.coinMarketsState.value
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 64.dp)
+    ) {
+        items(coinMarketsState.coinMarkets) { coin ->
+            CoinMarketsRawItem(
+                coin = coin,
+                onItemClick = { navController.navigate(Screen.DetailPage.route) }
+            )
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(Color.White)
+            )
+        }
+    }
+}
+
+@Composable
+fun CoinMarketsRawItem(coin: CoinMarkets, onItemClick: (CoinMarkets) -> Unit) {
+
+    ConstraintLayout(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(12.dp)
+            .clickable { onItemClick(coin) }
+    ) {
+
+        val (coinName, price, coinImage, priceChange, coinChangeImage) = createRefs()
+
+        Image(
+            painter = rememberImagePainter(data = coin.image),
+            contentDescription = "Coin Image",
+            modifier = Modifier
+                .size(30.dp)
+                .constrainAs(coinImage) {
+                    top.linkTo(parent.top)
+                    start.linkTo(parent.start)
+                    bottom.linkTo(parent.bottom)
+                }
+        )
+
+        Text(
+            text = coin.name ?: "Unknown",
+            color = Color.Black,
+            fontSize = 14.sp,
+            modifier = Modifier
+                .constrainAs(coinName) {
+                    top.linkTo(parent.top)
+                    start.linkTo(coinImage.end)
+                }
+                .padding(start = 12.dp)
+        )
+
+        Text(
+            text = "$${coin.currentPrice}",
+            color = Color.Black,
+            fontSize = 14.sp,
+            modifier = Modifier
+                .constrainAs(price) {
+                    top.linkTo(coinName.bottom)
+                    start.linkTo(coinImage.end)
+                }
+                .padding(start = 12.dp)
+        )
+
+        Text(
+            text = "${coin.priceChangePercentage24h}%",
+            color = Color.Black,
+            fontSize = 12.sp,
+            modifier = Modifier
+                .constrainAs(priceChange) {
+                    top.linkTo(parent.top)
+                    end.linkTo(parent.end)
+                }
+                .padding(end = 12.dp)
+        )
+
+        Image(
+            painter = painterResource(
+                id = if (coin.priceChangePercentage24h!! > 0) {
+                    R.drawable.increase
+                } else {
+                    R.drawable.decrease
+                }
+            ),
+            contentDescription = "Coin Change Image",
+            modifier = Modifier
+                .size(20.dp, 14.dp)
+                .constrainAs(coinChangeImage) {
+                    top.linkTo(priceChange.top)
+                    start.linkTo(priceChange.end)
+                    bottom.linkTo(priceChange.bottom)
+                },
+            contentScale = ContentScale.Crop
+        )
     }
 }
 
