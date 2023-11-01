@@ -5,7 +5,7 @@ object Constants {
     const val COIN_LIST = "coins/list"
     const val COIN_MARKETS ="coins/markets?vs_currency=usd&order=market_cap_desc&per_page=30&page=1&sparkline=false"
     const val COIN_BY_ID ="coins/{id}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false"
-    const val FAVOURITES_COLLECTION = "favourites"
+    const val FAVOURITES_COLLECTION = "favorites"
     const val COIN_ID = "coinId"
     const val NA = "N/A"
     const val SYNC_DATA_WORK_NAME = "syncDataWorkName"

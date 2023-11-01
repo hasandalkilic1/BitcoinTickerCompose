@@ -10,15 +10,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.bitcointickercompose.presentation.DetailPage.DetailPage
+import com.example.bitcointickercompose.presentation.FavoritesPage.FavoritesPage
 import com.example.bitcointickercompose.presentation.HomePage.HomePage
 import com.example.bitcointickercompose.presentation.SignInPage.SignInPage
 import com.example.bitcointickercompose.presentation.SignUpPage.SignUpPage
 import com.example.bitcointickercompose.presentation.SplashPage.SplashPage
 import com.example.bitcointickercompose.presentation.theme.BitcoinTickerComposeTheme1
+import com.example.bitcointickercompose.utils.Constants.COIN_ID
 import com.example.bitcointickercompose.utils.UserManagerDataStorage
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -58,8 +61,11 @@ class MainActivity : ComponentActivity() {
                         composable(route = Screen.SignUpPage.route) {
                             SignUpPage(navController = navController)
                         }
-                        composable(route = Screen.DetailPage.route) {
+                        composable(route = Screen.DetailPage.route+"/{${COIN_ID}}") {
                             DetailPage(navController = navController)
+                        }
+                        composable(route = Screen.FavoritesPage.route) {
+                            FavoritesPage(navController = navController)
                         }
                     }
                 }

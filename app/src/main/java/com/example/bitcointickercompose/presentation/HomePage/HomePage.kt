@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,10 +16,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -29,6 +28,7 @@ import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,11 +40,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.bitcointickercompose.R
@@ -52,6 +54,7 @@ import com.example.bitcointickercompose.domain.model.CoinMarkets
 import com.example.bitcointickercompose.presentation.MainActivity
 import com.example.bitcointickercompose.presentation.Screen
 import com.example.bitcointickercompose.presentation.theme.beige
+import com.example.bitcointickercompose.presentation.theme.dark_green
 import com.example.bitcointickercompose.presentation.theme.light_Green
 import com.example.bitcointickercompose.utils.Resource
 import com.example.bitcointickercompose.utils.UserManagerDataStorage
@@ -61,7 +64,6 @@ import com.example.bitcointickercompose.utils.UserManagerDataStorage
 @Composable
 fun HomePage(
     navController: NavController,
-    viewModel: HomePageViewModel = hiltViewModel(),
     userManager: UserManagerDataStorage
 ) {
 
@@ -70,6 +72,8 @@ fun HomePage(
             .fillMaxSize()
             .background(light_Green),
     ) {
+
+        // TopBar
         Scaffold(
             topBar = { HomePageTopBar(userManager = userManager) },
             modifier = Modifier
@@ -79,14 +83,14 @@ fun HomePage(
                 )
                 .background(beige)
                 .fillMaxWidth()
-        ) {
+        ) {}
 
-        }
-
+        // List of coins
         HomePageCoinMarketsColumn(navController = navController)
 
+        // BottomBar
         Scaffold(
-            bottomBar = { HomePageBottomButtons() },
+            bottomBar = { HomePageBottomButtons(navController = navController) },
             modifier = Modifier
                 .height(64.dp)
                 .clip(
@@ -94,9 +98,7 @@ fun HomePage(
                 )
                 .align(Alignment.BottomCenter)
                 .background(beige)
-        ) {
-
-        }
+        ) {}
     }
 }
 
@@ -110,106 +112,118 @@ fun HomePageCoinMarketsColumn(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 64.dp)
+            .padding(top = 64.dp, bottom = 64.dp)
     ) {
         items(coinMarketsState.coinMarkets) { coin ->
-            CoinMarketsRawItem(
+            CoinMarketsRowItem(
                 coin = coin,
-                onItemClick = { navController.navigate(Screen.DetailPage.route) }
-            )
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(Color.White)
+                onItemClick = { navController.navigate(Screen.DetailPage.route + "/${coin.coinId}") }
             )
         }
     }
 }
 
 @Composable
-fun CoinMarketsRawItem(coin: CoinMarkets, onItemClick: (CoinMarkets) -> Unit) {
+fun CoinMarketsRowItem(coin: CoinMarkets, onItemClick: (CoinMarkets) -> Unit) {
 
-    ConstraintLayout(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(12.dp)
-            .clickable { onItemClick(coin) }
+            .padding(12.dp),
     ) {
-
-        val (coinName, price, coinImage, priceChange, coinChangeImage) = createRefs()
-
-        Image(
-            painter = rememberImagePainter(data = coin.image),
-            contentDescription = "Coin Image",
+        ConstraintLayout(
             modifier = Modifier
-                .size(30.dp)
-                .constrainAs(coinImage) {
-                    top.linkTo(parent.top)
-                    start.linkTo(parent.start)
-                    bottom.linkTo(parent.bottom)
-                }
-        )
+                .fillMaxWidth()
+                .background(Color.White)
+                .padding(12.dp)
+                .clickable { onItemClick(coin) },
+        ) {
 
-        Text(
-            text = coin.name ?: "Unknown",
-            color = Color.Black,
-            fontSize = 14.sp,
-            modifier = Modifier
-                .constrainAs(coinName) {
-                    top.linkTo(parent.top)
-                    start.linkTo(coinImage.end)
-                }
-                .padding(start = 12.dp)
-        )
+            val (coinName, price, coinImage, priceChange, coinChangeImage) = createRefs()
 
-        Text(
-            text = "$${coin.currentPrice}",
-            color = Color.Black,
-            fontSize = 14.sp,
-            modifier = Modifier
-                .constrainAs(price) {
-                    top.linkTo(coinName.bottom)
-                    start.linkTo(coinImage.end)
-                }
-                .padding(start = 12.dp)
-        )
+            // Coin Image
+            Image(
+                painter = rememberImagePainter(data = coin.image),
+                contentDescription = "Coin Image",
+                modifier = Modifier
+                    .size(30.dp)
+                    .constrainAs(coinImage) {
+                        top.linkTo(parent.top)
+                        start.linkTo(parent.start)
+                        bottom.linkTo(parent.bottom)
+                    }
+            )
 
-        Text(
-            text = "${coin.priceChangePercentage24h}%",
-            color = Color.Black,
-            fontSize = 12.sp,
-            modifier = Modifier
-                .constrainAs(priceChange) {
-                    top.linkTo(parent.top)
-                    end.linkTo(parent.end)
-                }
-                .padding(end = 12.dp)
-        )
+            // Coin Name
+            Text(
+                text = coin.name ?: "Unknown",
+                color = Color.Black,
+                fontSize = 14.sp,
+                modifier = Modifier
+                    .constrainAs(coinName) {
+                        top.linkTo(parent.top)
+                        start.linkTo(coinImage.end)
+                    }
+                    .padding(start = 12.dp)
+            )
 
-        Image(
-            painter = painterResource(
-                id = if (coin.priceChangePercentage24h!! > 0) {
-                    R.drawable.increase
+            // Coin Price
+            Text(
+                text = "$${coin.currentPrice}",
+                color = Color.Black,
+                fontSize = 14.sp,
+                modifier = Modifier
+                    .constrainAs(price) {
+                        top.linkTo(coinName.bottom)
+                        start.linkTo(coinImage.end)
+                    }
+                    .padding(start = 12.dp)
+            )
+
+            // Coin Change Percentage
+            Text(
+                text = String.format("%.2f", coin.priceChangePercentage24h) + "%",
+                color = if (coin.priceChangePercentage24h!! > 0) {
+                    dark_green
                 } else {
-                    R.drawable.decrease
-                }
-            ),
-            contentDescription = "Coin Change Image",
-            modifier = Modifier
-                .size(20.dp, 14.dp)
-                .constrainAs(coinChangeImage) {
-                    top.linkTo(priceChange.top)
-                    start.linkTo(priceChange.end)
-                    bottom.linkTo(priceChange.bottom)
+                    Color.Red
                 },
-            contentScale = ContentScale.Crop
-        )
+                fontSize = 12.sp,
+                modifier = Modifier
+                    .constrainAs(priceChange) {
+                        top.linkTo(parent.top)
+                        end.linkTo(parent.end)
+                        centerVerticallyTo(parent)
+                    }
+                    .padding(end = 12.dp)
+            )
+
+            // Increase-Decrease Picture
+            Image(
+                painter = painterResource(
+                    id = if (coin.priceChangePercentage24h!! > 0) {
+                        R.drawable.increase
+                    } else {
+                        R.drawable.decrease
+                    }
+                ),
+                contentDescription = "Coin Change Image",
+                modifier = Modifier
+                    .size(14.dp)
+                    .padding(end = 4.dp)
+                    .constrainAs(coinChangeImage) {
+                        top.linkTo(parent.top)
+                        end.linkTo(priceChange.start)
+                        centerVerticallyTo(parent)
+                    },
+                contentScale = ContentScale.Crop
+            )
+        }
     }
 }
 
 @Composable
-fun HomePageBottomButtons() {
+fun HomePageBottomButtons(navController: NavController) {
     val isHomeButtonClicked = remember {
         mutableStateOf(true)
     }
@@ -223,6 +237,8 @@ fun HomePageBottomButtons() {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
+
+        // Home Button
         Button(
             onClick = {
                 isHomeButtonClicked.value = true
@@ -249,10 +265,16 @@ fun HomePageBottomButtons() {
             }
         }
 
+        // Favorites Button
         Button(
             onClick = {
                 isFavoritesButtonClicked.value = true
                 isHomeButtonClicked.value = false
+                navController.navigate(Screen.FavoritesPage.route) {
+                    popUpTo(navController.graph.id) {
+                        inclusive = true
+                    }
+                }
             },
             modifier = Modifier
                 .fillMaxSize()
@@ -333,6 +355,8 @@ fun HomePageTopBar(
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
     ) {
+
+        // Current User's Email
         Text(
             text = currentUserEmail.value,
             modifier = Modifier
@@ -341,6 +365,7 @@ fun HomePageTopBar(
                 .background(beige),
         )
 
+        // Search Icon
         IconButton(onClick = { /*TODO*/ }) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_search_24),
@@ -348,6 +373,7 @@ fun HomePageTopBar(
             )
         }
 
+        // Sign Out Button
         IconButton(
             onClick = {
                 viewModel.signOut()

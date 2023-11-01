@@ -41,7 +41,6 @@ class HomePageViewModel @Inject constructor(
                     _coinMarketsState.value = CoinMarketsState(coinMarkets = it.data ?: emptyList())
                 }
             }
-
         }
     }
 

@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bitcointickercompose.R
 import com.example.bitcointickercompose.domain.model.CoinDetail
+import com.example.bitcointickercompose.domain.model.Favorites
 import com.example.bitcointickercompose.domain.usecase.coins.GetCoinByIdUseCase
 import com.example.bitcointickercompose.domain.usecase.coins.GetCurrentPriceByIdUseCase
 import com.example.bitcointickercompose.domain.usecase.favourite.AddToFavoritesUseCase
@@ -17,22 +18,18 @@ import com.example.bitcointickercompose.utils.Resource
 import com.example.bitcointickercompose.utils.UIScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.time.Duration
 
 @HiltViewModel
 class DetailPageViewModel @Inject constructor(
     private val getCoinByIdUseCase: GetCoinByIdUseCase,
     private val currentPriceByIdUseCase: GetCurrentPriceByIdUseCase,
     private val addToFavoritesUseCase: AddToFavoritesUseCase,
-    private val savedStateHandle: SavedStateHandle,
+    private val stateHandle: SavedStateHandle,
     private val stringResourceProvider: StringResourceProvider
 ) : ViewModel() {
-
-    private var coinDetailUI: CoinDetail? = null
 
     private val _coinDetail = mutableStateOf<DetailPageState>(DetailPageState())
     val coinDetail: State<DetailPageState> = _coinDetail
@@ -44,7 +41,7 @@ class DetailPageViewModel @Inject constructor(
     val addToFavourite = _addToFavourite.asSharedFlow()
 
     init {
-        savedStateHandle.get<String>(COIN_ID)?.let {
+        stateHandle.get<String>(COIN_ID)?.let {
             coinById(it)
         }
     }
@@ -65,8 +62,8 @@ class DetailPageViewModel @Inject constructor(
         }
     }
 
-    fun currentPriceById(period: Duration) = viewModelScope.launch {
-        savedStateHandle.get<String>(COIN_ID)?.let {
+    fun currentPriceById(period: kotlin.time.Duration) = viewModelScope.launch {
+        stateHandle.get<String>(COIN_ID)?.let {
             currentPriceByIdUseCase.invoke(period,it).collect {
                 when (it) {
                     is Resource.Success -> {
@@ -79,8 +76,8 @@ class DetailPageViewModel @Inject constructor(
         }
     }
 
-    fun addToFavorites() = viewModelScope.launch {
-        coinDetailUI?.let {
+    fun addToFavorites(coin: CoinDetail) = viewModelScope.launch {
+        coin.let {
             addToFavoritesUseCase.invoke(it).collect {
                 when (it) {
                     is Resource.Success -> {

@@ -36,9 +36,19 @@ class FavoritesViewModel @Inject constructor(
         getFavorites()
     }
 
-    private fun getFavorites() = viewModelScope.launch {
+    fun getFavorites() = viewModelScope.launch {
         getFavoritesUseCase.invoke().collect {
-            _favoritesState.value = FavoritesPageState(favorites = it.data ?: emptyList())
+            when (it) {
+                is Resource.Error -> {
+                    _favoritesState.value = FavoritesPageState(error = it.message ?: "Error")
+                }
+                is Resource.Loading -> {
+                    _favoritesState.value = FavoritesPageState(isLoading = true)
+                }
+                is Resource.Success -> {
+                    _favoritesState.value = FavoritesPageState(favorites = it.data ?: emptyList())
+                }
+            }
         }
     }
 
